@@ -1,3 +1,4 @@
+library(tidyverse)
 # Ok, let's just take it at face value, assume we have to use the
 # relative risk #'s, because that's what we have. 
 # We can debate whether it's more appropriate to use the full dataset or the
@@ -265,11 +266,11 @@ mm_per_coverage2 =
              TE = rr_per_coverage,
              seTE = rr_per_coverage_se,
              studlab = Study,
-             sm = "RR",
+             sm = "SMD",
              common = TRUE,
              random = FALSE)
 
-forest.meta(mm_per_coverage2, common = FALSE, xlim = c(0.001, 100), #xlim = c(-40, 20),
+forest.meta(mm_per_coverage2, common = FALSE, #xlim = c(0.001, 100), #xlim = c(-40, 20),
                 text.addline1 = "Effect on all-cause mortality, scaled for intervention coverage")#, 
  title("test title")
 funnel.meta(mm_per_coverage2, studlab = TRUE, pos.studlab = 4)

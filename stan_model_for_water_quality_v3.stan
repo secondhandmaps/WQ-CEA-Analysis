@@ -99,8 +99,6 @@ transformed parameters {
   
   real mu_direct = (1 - mortality_effect) * internal_validity_mortality * external_validity_mortality;
   real mu_combined = (mu_indirect + mu_direct)/2;
-  
-  
 }
 
 
@@ -116,7 +114,8 @@ model {
 }
 
 generated quantities {
+  real diarrhea_rr_adjusted = 1 - ((1-morbidity_effect)*self_reporting_bias*morbidity_adherence_adjustment);
   real mills_reincke_factor = frac_of_deaths_impacted/frac_deaths_by_category[1];
-  real frac_et_else_impacted = (frac_of_deaths_impacted - frac_deaths_by_category[1] - frac_deaths_by_category[2]) /
+  real frac_other_infections_impacted = (frac_of_deaths_impacted - frac_deaths_by_category[1] - frac_deaths_by_category[2]) /
                                 frac_deaths_by_category[3];
 }

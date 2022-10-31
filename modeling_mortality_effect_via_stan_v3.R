@@ -6,16 +6,22 @@ library(rstan)
 # External validity morbidity are from 'External validity adjustment'
 # External validity mortality are from 'External validity adjustment'
 # Frac deaths by category are from https://docs.google.com/spreadsheets/d/1TGlqAp3aZvsG8lagYajP1h27z_nN-4flLsHVhQrhDMU/edit#gid=0
+# The categories for frac_deaths_by_category are:
+# 1. Enteric Disease
+# 2. Respiratory infections, incl TB
+# 3. Other infections: Neonatal sepsis, NTDs and malaria, HIV/AIDS and STDs, 
+#    Other infectious diseases, and Nutritional deficiencies
+# 4. Other neonatal disorders
 data_for_stan_all = 
   tribble(~intervention, ~countrywide_treatment_fraction, 
         ~baseline_treatment_fraction, ~external_validity_morbidity, 
         ~external_validity_mortality, ~frac_deaths_by_category, 
-        "Kenya ILC", 0.45, 0.224, 1.12 , 1.27, c(17.4, 12.5, 31.8, 7.01)/100,
-        "Kenya DSW", 0.45, 0.224, 0.52, 0.58, c(17.4, 12.5, 31.8, 7.01)/100,
+        "Kenya ILC", 0.453, 0.224, 1.12 , 1.27, c(17.4, 12.5, 31.8, 7.01)/100,
+        "Kenya DSW", 0.453, 0.224, 0.52, 0.58, c(17.4, 12.5, 31.8, 7.01)/100,
         "Uganda DSW", 0.498, 0.172, 0.83, 0.59, c(5.2, 8.6, 44.5, 5.51)/100,
         "Malawi DSW", 0.266, 0.079, 1.08, 1.16, c(10.3, 14.3, 33.5, 6.38)/100) %>%
   mutate(
-    internal_validity_mortality = 0.8,
+    internal_validity_mortality = 0.74,
     morbidity_adherence = 0.53,
     mortality_adherence = 0.49,
     mortality_lrr_est = -0.214,
@@ -70,8 +76,6 @@ fit_kenya_dsw = stan(stan_file,
     rownames_to_column("parameter") %>%
     mutate(intervention = "Kenya DSW", .before = 1) )
 
-# summary(fit_kenya_dsw)$summary[, c("mean", "se_mean", "sd", "2.5%")]
-
 fit_uganda_dsw = stan(stan_file,
                       data = data_for_stan_split$`Uganda DSW`,
                       iter = n_iter, warmup = 500, 
@@ -100,4 +104,8 @@ fit_malawi_dsw = stan(stan_file,
 
 combined_summary = 
   bind_rows(s_kenya_ilc, s_kenya_dsw, s_uganda_dsw, s_malawi_dsw)
-write_csv(combined_summary, "results_from_bayesian_analysis.csv")
+write_csv(combined_summary, "results_from_mcmc.csv")
+combined_summary_mean_only = combined_summary %>%
+  select(intervention, parameter, mean) %>%
+  pivot_wider(names_from = intervention, values_from = mean)
+write_csv(combined_summary_mean_only, "results_from_mcmc_mean_only.csv")
